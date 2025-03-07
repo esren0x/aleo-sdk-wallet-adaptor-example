@@ -1,38 +1,68 @@
-import React from "react";
+import React, { useMemo } from "react";
 import ReactDOM from "react-dom/client";
-import { WalletProvider } from "aleo-hooks";
+import { WalletProvider } from "@demox-labs/aleo-wallet-adapter-react";
+import { WalletModalProvider } from "@demox-labs/aleo-wallet-adapter-reactui";
 import {
   PuzzleWalletAdapter,
-  LeoWalletAdapter,
+  // LeoWalletAdapter,
   FoxWalletAdapter,
   SoterWalletAdapter,
+  // configureConnectionForPuzzle,
 } from "aleo-adapters";
+import {
+  DecryptPermission,
+  WalletAdapterNetwork,
+} from "@demox-labs/aleo-wallet-adapter-base";
+import { LeoWalletAdapter } from "@demox-labs/aleo-wallet-adapter-leo";
+
 import App from "./App";
-import "./index.css";
+import "./index.css"; // Ensure this exists
 
-// ✅ Ensure wallets are correctly initialized
-const wallets = [
-  new LeoWalletAdapter({ appName: "Aleo App" }),
-  new PuzzleWalletAdapter({
-    programIdPermissions: {
-      mainnet: ["dApp_1.aleo", "dApp_1_import.aleo", "dApp_1_import_2.aleo"],
-      testnet: ["dApp_1_test.aleo", "dApp_1_test_import.aleo", "dApp_1_test_import_2.aleo"],
-    },
-    appName: "Aleo App",
-    appDescription: "A privacy-focused DeFi app",
-    appIconUrl: "https://aleo.network/favicon.ico",
-  }),
-  new FoxWalletAdapter({ appName: "Aleo App" }),
-  new SoterWalletAdapter({ appName: "Aleo App" }),
-];
+// Default styles (required for modal UI)
+import "@demox-labs/aleo-wallet-adapter-reactui/styles.css";
 
-// ✅ Debug: Log before passing to WalletProvider
-console.log("Passing wallets to WalletProvider:", wallets);
+const WalletWrapper = () => {
+  // Initialize wallets inside a functional component using useMemo.
+  const wallets = useMemo(
+    () => [
+      new LeoWalletAdapter({
+        appName: "Leo Demo App",
+      }),
+      new PuzzleWalletAdapter({
+        programIdPermissions: {
+          ["AleoMainnet"]: [
+            "rockpaperscissors_game.aleo",
+          ],
+          ["AleoTestnet"]: [
+            "rockpaperscissors_game.aleo",
+          ],
+        },
+        appName: "Rock Paper Scissors",
+        appDescription: "A simple game of rock paper scissors",
+      }),
+      // You can uncomment or add additional adapters here if needed:
+      // new FoxWalletAdapter({ appName: "Aleo app" }),
+      // new SoterWalletAdapter({ appName: "Aleo app" }),
+    ],
+    []
+  );
+
+  return (
+    <WalletProvider
+      wallets={wallets}
+      decryptPermission={DecryptPermission.UponRequest}
+      network={WalletAdapterNetwork.TestnetBeta} // Change to 'MainnetBeta' or 'TestnetBeta' if needed
+      autoConnect
+    >
+      <WalletModalProvider>
+        <App />
+      </WalletModalProvider>
+    </WalletProvider>
+  );
+};
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <WalletProvider wallets={wallets} autoConnect={true}>
-      <App />
-    </WalletProvider>
+    <WalletWrapper />
   </React.StrictMode>
 );
