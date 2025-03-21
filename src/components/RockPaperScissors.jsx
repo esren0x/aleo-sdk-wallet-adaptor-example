@@ -38,6 +38,7 @@ const RockpaperScissors = ({ wallet, publicKey }) => {
 
       console.log("Transaction built:", tx);
       setTxStatus("Sending transaction...");
+      WalletAdapterNetwork
 
       // Execute the transaction using the wallet adapter.
       const txId = await wallet.adapter.requestTransaction(tx);
