@@ -4,6 +4,7 @@ import {
   WalletAdapterNetwork,
   WalletNotConnectedError,
 } from "@demox-labs/aleo-wallet-adapter-base";
+import GameHistory from "./GameHistory";
 
 const RockpaperScissors = ({ wallet, publicKey }) => {
   // Make sure this program ID exactly matches your deployed program.
@@ -60,6 +61,9 @@ const RockpaperScissors = ({ wallet, publicKey }) => {
       <button onClick={() => playGame(2)}>Scissors</button>
       {txStatus && <p>Status: {txStatus}</p>}
       {transactionId && <p>Transaction ID: {transactionId}</p>}
+
+      <br/>
+      <GameHistory wallet={wallet} publicKey={publicKey} />
     </div>
   );
 };
