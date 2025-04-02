@@ -4,24 +4,41 @@ import {
     WalletAdapterNetwork,
     WalletNotConnectedError,
 } from "@demox-labs/aleo-wallet-adapter-base";
-import { BHP256, initThreadPool } from '@provablehq/sdk';
-import { Address } from '@provablehq/sdk/mainnet.js';
+import {
+    Address,
+    AleoNetworkClient,
+    BHP256,
+    initThreadPool,
+} from '@provablehq/sdk';
 
 const GameHistory = ({ wallet, publicKey }) => {
     initThreadPool().then(() => {});
+    const networkClient = new AleoNetworkClient("https://api.explorer.provable.com/v1");
 
     const [games, setGames] = useState([]);
-    // const bhp = new BHP256();
-    // const addressPlaintextBits = new Address(publicKey);
-    console.log("HELP: ", addressPlaintextBits);
+    const bhp = new BHP256();
+    const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
+    const addressHash = bhp.hash(addressPlaintextBits);
+    console.log("HELP: ", addressHash.toString());
 
-    // const fetchGame = (gameIndex) => {
-    //     const gameStruct = 
-    // }
+    let gamesPlayed = async () => {
+        // parseInt((await networkClient.getProgramMappingValue("rockpaperscissors_game_v0_1_1.aleo", "game_count", addressHash.toString())).replace("u64", ""));
+        let numGames = await networkClient.getProgramMappingValue("rockpaperscissors_game_v0_1_1.aleo", "game_count", addressHash.toString()) ?? "0u64";
+        return parseInt(numGames.replace("u64", ""));
+    };
 
-    // useEffect(() => {
+    const fetchGame = (gameIndex) => {
+        const gameStruct = `{
+            player_hash: ${addressHash.toString()},
+            game_index: ${gameIndex}
+        }`
+        console.log(gameStruct)
+    };
 
-    // })
+    useEffect(() => {
+        let games = gamesPlayed().then((res) => console.log("NUM GAMES: ", res));
+        fetchGame(0);
+    }, []);
 
     return (
         <div>
