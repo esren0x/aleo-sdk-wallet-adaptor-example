@@ -11,12 +11,14 @@ import {
     initThreadPool,
     Plaintext,
 } from '@provablehq/sdk';
+import {FidgetSpinner} from 'react-loader-spinner';
 
 const GameHistory = ({ wallet, publicKey }) => {
     initThreadPool().then(() => {});
     const networkClient = new AleoNetworkClient("https://api.explorer.provable.com/v1");
 
     const [games, setGames] = useState([]);
+    const [gamesLoading, setGamesLoading] = useState(true);
     const [page, setPage] = useState(0);
 
     const bhp = new BHP256();
@@ -33,7 +35,7 @@ const GameHistory = ({ wallet, publicKey }) => {
             player_hash: ${addressHash.toString()},
             game_index: ${gameIndex}u64
         }`;
-        console.log(gameStruct)
+
         let pt = Plaintext.fromString(gameStruct);
         let bits = pt.toBitsLe();
         let hash = bhp.hash(bits);
@@ -41,32 +43,91 @@ const GameHistory = ({ wallet, publicKey }) => {
         return game.toObject();
     };
 
+    const handlePageDown = () => {
+        if (page > 0) {
+            setPage(page-1);
+            setGamesLoading(true);
+        }
+    }
+
+    const handlePageUp = () => {
+        if ((page - 1) * 5 <= games.length) {
+            setPage(page+1);
+            setGamesLoading(true);
+        }
+    }
+
+    const displayGame = (game) => {
+        const translateMove = (move) => {
+            if (move === 0) {
+                return '✌️';
+            } else if (move === 1) {
+                return '✋';
+            } else {
+                return '✊';
+            }
+        }
+
+        const translateResult = (res) => {
+            if (res === 0) {
+                return "Draw";
+            } else if (res === 1) {
+                return "Player Loses";
+            } else {
+                return "Player Wins";
+            }
+        }
+
+        return <li>{`Game ${game.key} - Player Move: ${translateMove(game.player_move)} - System Move: ${translateMove(game.system_move)} - ${translateResult(game.outcome)}`}</li>
+    }
+
     useEffect(() => {
         gamesPlayed().then((numGames) => {
             console.log(numGames)
             const start = page * 5;
-            const end = start + 4;
-            let gamesOnPage = [];
-            for (let i = start; i <= end; i++) {
-                fetchGame(i)
-                    .then(game => {
-                        gamesOnPage = games;
-                        gamesOnPage.push(game);
-                        setGames(gamesOnPage);
-                        console.log(games)
-                    });
+            const buildPage = async (start) => {
+                let gamesOnPage = [];
+                const end = start + 4;
+                for (let i = start; i <= end; i++) {
+                    const key = numGames - 1 - i;
+                    if (key < 0) {
+                        break;
+                    }
+                    let game = await fetchGame(key);
+                    game.key = key;
+                    gamesOnPage.push(game);
+                }
+                return gamesOnPage;
             }
+            buildPage(start).then(g => {
+                setGamesLoading(false);
+                console.log("GAMES: ", g);
+                setGames(g);
+            });
         });
-    }, []);
+    }, [page]);
 
     return (
         <div>
             {publicKey && <h4>Game History for {publicKey}:</h4>}
-            <ul>
-            {games.forEach(game => {
-                <li>{game}</li>
-            })}
-            </ul>
+            {
+                gamesLoading ?
+                <FidgetSpinner
+                    visible={true}
+                    height="80"
+                    width="80"
+                    ariaLabel="fidget-spinner-loading"
+                    wrapperStyle={{}}
+                    wrapperClass="fidget-spinner-wrapper"
+                /> :
+                games.map(game => {
+                    return displayGame(game);
+                }
+            )}
+            <div>
+                <button onClick={handlePageDown} disabled={page <= 0}>Prev</button>
+                <button onClick={handlePageUp} disabled={(page - 1) * 5 > games.length}>Next</button>
+            </div>
         </div>
     )
 };

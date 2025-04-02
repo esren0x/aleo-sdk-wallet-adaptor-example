@@ -33,7 +33,7 @@ const RockpaperScissors = ({ wallet, publicKey }) => {
         deployedProgramId, // Program ID exactly as deployed
         "play",          // Function name to call
         inputs,          // Array of input strings
-        150195,             // Fee amount
+        212751,             // Fee amount
         false            // Fee is public (false)
       );
 
