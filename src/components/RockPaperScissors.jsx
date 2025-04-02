@@ -8,7 +8,7 @@ import GameHistory from "./GameHistory";
 
 const RockpaperScissors = ({ wallet, publicKey }) => {
   // Make sure this program ID exactly matches your deployed program.
-  const deployedProgramId = "rockpaperscissors_game.aleo";
+  const deployedProgramId = "rockpaperscissors_game_v0_1_1.aleo";
 
   const [txStatus, setTxStatus] = useState("");
   const [transactionId, setTransactionId] = useState("");
@@ -24,7 +24,7 @@ const RockpaperScissors = ({ wallet, publicKey }) => {
 
       // IMPORTANT: Double-check that the chain ID is correct.
       // For example, try "testnetbeta" exactly if that's what the network expects.
-      const chainId = "testnetbeta";
+      const chainId = "testnet";
 
       // Build the transaction using the helper.
       const tx = Transaction.createTransaction(
@@ -39,7 +39,6 @@ const RockpaperScissors = ({ wallet, publicKey }) => {
 
       console.log("Transaction built:", tx);
       setTxStatus("Sending transaction...");
-      WalletAdapterNetwork
 
       // Execute the transaction using the wallet adapter.
       const txId = await wallet.adapter.requestTransaction(tx);
