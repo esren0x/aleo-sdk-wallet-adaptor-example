@@ -11,7 +11,7 @@ import {
     initThreadPool,
     Plaintext,
 } from '@provablehq/sdk';
-import {FidgetSpinner} from 'react-loader-spinner';
+import { RotatingSquare } from 'react-loader-spinner';
 
 const GameHistory = ({ wallet, publicKey }) => {
     initThreadPool().then(() => {});
@@ -60,11 +60,11 @@ const GameHistory = ({ wallet, publicKey }) => {
     const displayGame = (game) => {
         const translateMove = (move) => {
             if (move === 0) {
-                return '✌️';
+                return '✊';
             } else if (move === 1) {
                 return '✋';
             } else {
-                return '✊';
+                return '✌️';
             }
         }
 
@@ -72,9 +72,9 @@ const GameHistory = ({ wallet, publicKey }) => {
             if (res === 0) {
                 return "Draw";
             } else if (res === 1) {
-                return "Player Loses";
-            } else {
                 return "Player Wins";
+            } else {
+                return "Player Loses";
             }
         }
 
@@ -94,7 +94,7 @@ const GameHistory = ({ wallet, publicKey }) => {
                         break;
                     }
                     let game = await fetchGame(key);
-                    game.key = key;
+                    game.key = key + 1;
                     gamesOnPage.push(game);
                 }
                 return gamesOnPage;
@@ -112,13 +112,14 @@ const GameHistory = ({ wallet, publicKey }) => {
             {publicKey && <h4>Game History for {publicKey}:</h4>}
             {
                 gamesLoading ?
-                <FidgetSpinner
+                <RotatingSquare
                     visible={true}
-                    height="80"
-                    width="80"
-                    ariaLabel="fidget-spinner-loading"
+                    height="100"
+                    width="100"
+                    color="#eb005b"
+                    ariaLabel="rotating-square-loading"
                     wrapperStyle={{}}
-                    wrapperClass="fidget-spinner-wrapper"
+                    wrapperClass=""
                 /> :
                 games.map(game => {
                     return displayGame(game);
