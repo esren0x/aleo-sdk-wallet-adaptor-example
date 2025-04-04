@@ -13,7 +13,7 @@ import {
 } from '@provablehq/sdk';
 import { RotatingSquare } from 'react-loader-spinner';
 
-const GameHistory = ({ wallet, publicKey, games, setGames, setNumGames }) => {
+const GameHistory = ({ wallet, publicKey, games, setGames, numGames, setNumGames }) => {
     initThreadPool().then(() => {});
     const networkClient = new AleoNetworkClient("https://api.explorer.provable.com/v1");
 
@@ -50,7 +50,7 @@ const GameHistory = ({ wallet, publicKey, games, setGames, setNumGames }) => {
     }
 
     const handlePageUp = () => {
-        if ((page - 1) * 5 <= games.length) {
+        if ((page + 1) * 5 <= numGames - 1) {
             setPage(page+1);
             setGamesLoading(true);
         }
@@ -77,7 +77,13 @@ const GameHistory = ({ wallet, publicKey, games, setGames, setNumGames }) => {
             }
         }
 
-        return <li>{`Game ${game.key} - Player Move: ${translateMove(game.player_move)} - System Move: ${translateMove(game.system_move)} - ${translateResult(game.outcome)}`}</li>
+        // return <li>{`Game ${game.key} - Player Move: ${translateMove(game.player_move)} - System Move: ${translateMove(game.system_move)} - ${translateResult(game.outcome)}`}</li>
+        return <tr>
+            <td>{game.key}</td>
+            <td>{translateMove(game.player_move)}</td>
+            <td>{translateMove(game.system_move)}</td>
+            <td>{translateResult(game.outcome)}</td>
+        </tr>
     }
 
     useEffect(() => {
@@ -107,26 +113,37 @@ const GameHistory = ({ wallet, publicKey, games, setGames, setNumGames }) => {
     }, [page]);
 
     return (
-        <div>
-            {publicKey && <h4>Game History for {publicKey}:</h4>}
+        <div className='history-container'>
+        {publicKey && <h4>Game History for {publicKey}:</h4>}
             {
                 gamesLoading ?
+                <div style={ { display: 'flex', justifyContent: 'center' } }>
                 <RotatingSquare
                     visible={true}
                     height="100"
                     width="100"
-                    color="#eb005b"
+                    color="#1553fa"
                     ariaLabel="rotating-square-loading"
                     wrapperStyle={{}}
                     wrapperClass=""
-                /> :
-                games.map(game => {
-                    return displayGame(game);
-                }
-            )}
+                    />
+                </div> :
+                <table>
+                    <tr>
+                        <th>Game #</th>
+                        <th>Player Move</th>
+                        <th>System Move</th>
+                        <th>Outcome</th>
+                    </tr>
+                    {games.map(game => {
+                        return displayGame(game);
+                    })}
+                </table>
+            }
+            <br />
             <div>
                 <button onClick={handlePageDown} disabled={page <= 0}>Prev</button>
-                <button onClick={handlePageUp} disabled={(page - 1) * 5 > games.length}>Next</button>
+                <button onClick={handlePageUp} disabled={(page + 1) * 5 > numGames - 1}>Next</button>
             </div>
         </div>
     )

@@ -70,6 +70,7 @@ const RockpaperScissors = ({ wallet, publicKey }) => {
         publicKey={publicKey}
         games={games}
         setGames={setGames}
+        numGames={numGames}
         setNumGames={setNumGames}
       />
       <PlayerStats

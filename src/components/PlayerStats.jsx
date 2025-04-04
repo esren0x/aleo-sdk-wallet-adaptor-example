@@ -30,7 +30,7 @@ const PlayerStats = ({ publicKey, numGames }) => {
                 setStats(res);
                 console.log(stats)
             })
-    }, []);
+    }, [stats]);
 
     return (
         <div>
