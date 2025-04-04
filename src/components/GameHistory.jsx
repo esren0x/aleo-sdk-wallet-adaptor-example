@@ -13,11 +13,10 @@ import {
 } from '@provablehq/sdk';
 import { RotatingSquare } from 'react-loader-spinner';
 
-const GameHistory = ({ wallet, publicKey }) => {
+const GameHistory = ({ wallet, publicKey, games, setGames, setNumGames }) => {
     initThreadPool().then(() => {});
     const networkClient = new AleoNetworkClient("https://api.explorer.provable.com/v1");
 
-    const [games, setGames] = useState([]);
     const [gamesLoading, setGamesLoading] = useState(true);
     const [page, setPage] = useState(0);
 
@@ -83,7 +82,7 @@ const GameHistory = ({ wallet, publicKey }) => {
 
     useEffect(() => {
         gamesPlayed().then((numGames) => {
-            console.log(numGames)
+            setNumGames(numGames);
             const start = page * 5;
             const buildPage = async (start) => {
                 let gamesOnPage = [];

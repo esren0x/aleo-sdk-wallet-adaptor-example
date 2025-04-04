@@ -13,6 +13,8 @@ const RockpaperScissors = ({ wallet, publicKey }) => {
 
   const [txStatus, setTxStatus] = useState("");
   const [transactionId, setTransactionId] = useState("");
+  const [games, setGames] = useState([]);
+  const [numGames, setNumGames] = useState(0);
 
   const playGame = async (move) => {
     try {
@@ -63,8 +65,18 @@ const RockpaperScissors = ({ wallet, publicKey }) => {
       {transactionId && <p>Transaction ID: {transactionId}</p>}
 
       <br/>
-      <GameHistory wallet={wallet} publicKey={publicKey} />
-      <PlayerStats wallet={wallet} publicKey={publicKey} />
+      <GameHistory
+        wallet={wallet}
+        publicKey={publicKey}
+        games={games}
+        setGames={setGames}
+        setNumGames={setNumGames}
+      />
+      <PlayerStats
+        wallet={wallet}
+        publicKey={publicKey}
+        numGames={numGames}
+      />
     </div>
   );
 };
