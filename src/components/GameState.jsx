@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from "react";
+import { AleoNetworkClient, BHP256 } from "@provablehq/sdk";
 
 // Create the context with a default value
 const DataContext = createContext({});
@@ -70,6 +71,8 @@ export const GameState = ({ children }) => {
                 setGames,
                 numGames: gameState.numGames,
                 setNumGames,
+                networkClient: new AleoNetworkClient("https://api.explorer.provable.com/v1"),
+                bhp: new BHP256(),
             }}
         >
             {children}

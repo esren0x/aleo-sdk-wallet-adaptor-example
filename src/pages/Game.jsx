@@ -20,6 +20,7 @@ const Homepage = () => {
         setTransactionId,
         games,
         setGames,
+        stats,
     } = useGameState();
 
     const playGame = async (move) => {
@@ -54,20 +55,25 @@ const Homepage = () => {
             console.log("Transaction executed:", txId);
             setTransactionId(txId);
             setTxStatus(`Transaction sent: ${txId}`);
+
+            const priorStats = {...stats};
+
             let adapterTxStatus = "";
             while (adapterTxStatus !== "Finalized") {
                 adapterTxStatus = await wallet?.adapter.transactionStatus(txId);
                 await new Promise(r => setTimeout(r, 2000));
             }
-            let retries = 5;
-            while (retries >= 0) {
-                try {
-                    const transactionHistory = await requestTransactionHistory(deployedProgramId);
-                } catch (e) {
-                    retries--;
-                    await new Promise(r => setTimeout(r, 2000));
-                }
+
+            let newStats = (await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "stats", addressHash)).toObject();
+
+            if (newStats.wins > priorStats.wins) {
+                console.log("You win!")
+            } else if (newStats.losses > priorStats.losses) {
+                console.log("You lose!")
+            } else {
+                console.log("It's a draw!")
             }
+            
         } catch (error) {
             console.error("Error executing transaction:", error);
             setTxStatus("Transaction failed");

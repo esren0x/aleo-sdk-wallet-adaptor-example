@@ -17,14 +17,11 @@ import { Button, Spin, Table } from 'antd';
 
 const GameHistory = () => {
     const { publicKey } = useWallet();
-    const { games, numGames, setGames, setNumGames } = useGameState();
-
-    const networkClient = new AleoNetworkClient("https://api.explorer.provable.com/v1");
+    const { bhp, networkClient, games, numGames, setGames, setNumGames } = useGameState();
 
     const [gamesLoading, setGamesLoading] = useState(true);
     const [page, setPage] = useState(0);
 
-    const bhp = new BHP256();
     const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
     const addressHash = bhp.hash(addressPlaintextBits);
 
@@ -126,7 +123,7 @@ const GameHistory = () => {
                     borderRadius: 4,
                 }} /></Spin>
                 </div> :
-                <Table 
+                <Table
                     dataSource={games.map(game => displayGame(game))}
                     columns={
                         [
