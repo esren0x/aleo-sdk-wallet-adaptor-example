@@ -41,7 +41,7 @@ export const WalletWrapper = ({ children }) => {
     return (
         <WalletProvider
             wallets={wallets}
-            decryptPermission={DecryptPermission.UponRequest}
+            decryptPermission={DecryptPermission.OnChainHistory}
             network={WalletAdapterNetwork.TestnetBeta} // Change to 'MainnetBeta' or 'TestnetBeta' if needed
             autoConnect
         >

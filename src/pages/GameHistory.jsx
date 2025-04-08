@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useGameState } from "../components/GameState.jsx";
 import {
     Transaction,
     WalletAdapterNetwork,
@@ -8,13 +9,16 @@ import {
     Address,
     AleoNetworkClient,
     BHP256,
-    initThreadPool,
     Plaintext,
 } from '@provablehq/sdk';
 import { RotatingSquare } from 'react-loader-spinner';
+import { useWallet } from '@demox-labs/aleo-wallet-adapter-react';
+import { Button, Spin, Table } from 'antd';
 
-const GameHistory = ({ wallet, publicKey, games, setGames, numGames, setNumGames }) => {
-    initThreadPool().then(() => {});
+const GameHistory = () => {
+    const { publicKey } = useWallet();
+    const { games, numGames, setGames, setNumGames } = useGameState();
+
     const networkClient = new AleoNetworkClient("https://api.explorer.provable.com/v1");
 
     const [gamesLoading, setGamesLoading] = useState(true);
@@ -67,7 +71,7 @@ const GameHistory = ({ wallet, publicKey, games, setGames, numGames, setNumGames
             }
         }
 
-        const translateResult = (res) => {
+        const translateOutcome = (res) => {
             if (res === 0) {
                 return "Draw";
             } else if (res === 1) {
@@ -77,13 +81,13 @@ const GameHistory = ({ wallet, publicKey, games, setGames, numGames, setNumGames
             }
         }
 
-        // return <li>{`Game ${game.key} - Player Move: ${translateMove(game.player_move)} - System Move: ${translateMove(game.system_move)} - ${translateResult(game.outcome)}`}</li>
-        return <tr>
-            <td>{game.key}</td>
-            <td>{translateMove(game.player_move)}</td>
-            <td>{translateMove(game.system_move)}</td>
-            <td>{translateResult(game.outcome)}</td>
-        </tr>
+        return {
+            key: `${game.key}`,
+            game: game.key,
+            playerMove: translateMove(game.playerMove),
+            systemMove: translateMove(game.systemMove),
+            outcome: translateOutcome(game.outcome),
+        }
     }
 
     useEffect(() => {
@@ -105,9 +109,8 @@ const GameHistory = ({ wallet, publicKey, games, setGames, numGames, setNumGames
                 return gamesOnPage;
             }
             buildPage(start).then(g => {
-                setGamesLoading(false);
-                console.log("GAMES: ", g);
                 setGames(g);
+                setGamesLoading(false);
             });
         });
     }, [page]);
@@ -118,32 +121,46 @@ const GameHistory = ({ wallet, publicKey, games, setGames, numGames, setNumGames
             {
                 gamesLoading ?
                 <div style={ { display: 'flex', justifyContent: 'center' } }>
-                <RotatingSquare
-                    visible={true}
-                    height="100"
-                    width="100"
-                    color="#1553fa"
-                    ariaLabel="rotating-square-loading"
-                    wrapperStyle={{}}
-                    wrapperClass=""
-                    />
+                <Spin size='large' tip='Loading...' ><div style={{
+                    padding: 50,
+                    borderRadius: 4,
+                }} /></Spin>
                 </div> :
-                <table>
-                    <tr>
-                        <th>Game #</th>
-                        <th>Player Move</th>
-                        <th>System Move</th>
-                        <th>Outcome</th>
-                    </tr>
-                    {games.map(game => {
-                        return displayGame(game);
-                    })}
-                </table>
+                <Table 
+                    dataSource={games.map(game => displayGame(game))}
+                    columns={
+                        [
+                            {
+                                title: "Game #",
+                                dataIndex: "game",
+                                key: "game",
+                            },
+                            {
+                                title: "Player Move",
+                                dataIndex: "playerMove",
+                                key: "playerMove",
+                            },
+                            {
+                                title: "System Move",
+                                dataIndex: "systemMove",
+                                key: "systemMove",
+                            },
+                            {
+                                title: "Outcome",
+                                dataIndex: "outcome",
+                                key: "outcome",
+                            },
+                        ]
+                    }
+                    pagination={{
+                        hideOnSinglePage: true,
+                    }}
+                />
             }
             <br />
-            <div>
-                <button onClick={handlePageDown} disabled={page <= 0}>Prev</button>
-                <button onClick={handlePageUp} disabled={(page + 1) * 5 > numGames - 1}>Next</button>
+            <div className='buttonRow'>
+                <Button className="button" onClick={handlePageDown} disabled={page <= 0}>Prev</Button>
+                <Button className="button" onClick={handlePageUp} disabled={(page + 1) * 5 > numGames - 1}>Next</Button>
             </div>
         </div>
     )
