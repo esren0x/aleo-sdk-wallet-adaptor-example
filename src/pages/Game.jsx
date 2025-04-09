@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Transaction, WalletAdapterNetwork } from "@demox-labs/aleo-wallet-adapter-base";
 import { useWallet } from "@demox-labs/aleo-wallet-adapter-react";
-import { Address } from "@provablehq/sdk";
+import { Address, Plaintext } from "@provablehq/sdk";
 import { useGameState } from "../components/GameState";
 import { Button } from "antd";
 import "./Game.css";
@@ -14,6 +14,8 @@ const Homepage = () => {
     const deployedProgramId = "rockpaperscissors_game_v0_1_1.aleo";
     const { publicKey, wallet, requestTransactionHistory } = useWallet();
 
+    const [currentGame, setCurrentGame] = useState(null);
+
     const {
         txStatus,
         setTxStatus,
@@ -24,6 +26,8 @@ const Homepage = () => {
         stats,
         networkClient,
         bhp,
+        formatGame,
+        gamesPlayed,
     } = useGameState();
 
     const playGame = async (move) => {
@@ -59,26 +63,45 @@ const Homepage = () => {
             setTransactionId(txId);
             setTxStatus(`Transaction sent: ${txId}`);
 
-            const priorStats = {...stats};
-
             let adapterTxStatus = "";
             while (adapterTxStatus !== "Finalized") {
+                console.log(adapterTxStatus);
                 adapterTxStatus = await wallet?.adapter.transactionStatus(txId);
-                await new Promise(r => setTimeout(r, 2000));
+                await new Promise(r => setTimeout(r, 5000));
             }
 
             const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
             const addressHash = bhp.hash(addressPlaintextBits);
 
-            const newStats = (await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "stats", addressHash)).toObject();
+            let gameIndex = await gamesPlayed();
 
-            if (newStats.wins > priorStats.wins) {
-                console.log("You win!")
-            } else if (newStats.losses > priorStats.losses) {
-                console.log("You lose!")
-            } else {
-                console.log("It's a draw!")
+            console.log(gameIndex)
+
+            const gameStruct = `{
+                player_hash: ${addressHash.toString()},
+                game_index: ${gameIndex}u64
+            }`;
+
+            console.log("STRUCT - ", gameStruct)
+    
+            let pt = Plaintext.fromString(gameStruct);
+            let bits = pt.toBitsLe();
+            let hash = bhp.hash(bits);
+            console.log(hash)
+            console.log(hash.toString())
+
+            let retries = 5;
+            let latestGame;
+            while (retries >= 0 && !latestGame) {
+                try {
+                    latestGame = await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "history", hash);
+                    setCurrentGame(formatGame(latestGame.toObject()));
+                } catch (e) {
+                    console.log("ERROR:", e);
+                }
+                await new Promise(r => setTimeout(r, 5000));
             }
+
             
         } catch (error) {
             console.error("Error executing transaction:", error);
@@ -107,6 +130,7 @@ const Homepage = () => {
                         </div>
                         {txStatus && <p>Status: {txStatus}</p>}
                         {transactionId && <p>Transaction ID: {transactionId}</p>}
+                        {currentGame && <p>Player: {currentGame.playerMove} - System: {currentGame.systemMove} -- {currentGame.outcome}</p>}
                         <br/>
                     </div>
             </div>

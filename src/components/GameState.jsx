@@ -77,6 +77,40 @@ export const GameState = ({ children }) => {
         }))
     }
 
+    const formatGame = (game) => {
+        const translateMove = (move) => {
+            if (move === 0) {
+                return '✊';
+            } else if (move === 1) {
+                return '✋';
+            } else {
+                return '✌️';
+            }
+        }
+
+        const translateOutcome = (res) => {
+            if (res === 0) {
+                return "Draw";
+            } else if (res === 1) {
+                return "Player Wins";
+            } else {
+                return "Player Loses";
+            }
+        }
+        
+        let formatted = {
+            playerMove: translateMove(game.player_move),
+            systemMove: translateMove(game.system_move),
+            outcome: translateOutcome(game.outcome),
+        }
+
+        if (game.key) {
+            formatted.key = `${game.key}`;
+            formatted.game = game.key;
+        }
+
+        return formatted;
+    }
 
     return (
         <DataContext.Provider
@@ -93,6 +127,8 @@ export const GameState = ({ children }) => {
                 setNumGames,
                 networkClient,
                 bhp,
+                formatGame,
+                gamesPlayed,
             }}
         >
             {children}

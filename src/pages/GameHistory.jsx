@@ -17,7 +17,7 @@ import { Button, Spin, Table } from 'antd';
 
 const GameHistory = () => {
     const { publicKey } = useWallet();
-    const { bhp, networkClient, games, numGames, setGames, setNumGames } = useGameState();
+    const { bhp, networkClient, games, numGames, setGames, setNumGames, formatGame } = useGameState();
 
     const [gamesLoading, setGamesLoading] = useState(true);
     const [page, setPage] = useState(0);
@@ -49,36 +49,6 @@ const GameHistory = () => {
         if ((page + 1) * 5 <= numGames - 1) {
             setPage(page+1);
             setGamesLoading(true);
-        }
-    }
-
-    const displayGame = (game) => {
-        const translateMove = (move) => {
-            if (move === 0) {
-                return '✊';
-            } else if (move === 1) {
-                return '✋';
-            } else {
-                return '✌️';
-            }
-        }
-
-        const translateOutcome = (res) => {
-            if (res === 0) {
-                return "Draw";
-            } else if (res === 1) {
-                return "Player Wins";
-            } else {
-                return "Player Loses";
-            }
-        }
-
-        return {
-            key: `${game.key}`,
-            game: game.key,
-            playerMove: translateMove(game.player_move),
-            systemMove: translateMove(game.system_move),
-            outcome: translateOutcome(game.outcome),
         }
     }
 
@@ -116,7 +86,7 @@ const GameHistory = () => {
                 }} /></Spin>
                 </div> :
                 <Table
-                    dataSource={games.map(game => displayGame(game))}
+                    dataSource={games.map(game => formatGame(game))}
                     columns={
                         [
                             {

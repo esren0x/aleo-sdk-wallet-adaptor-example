@@ -14,7 +14,7 @@
     "@demox-labs/aleo-wallet-adapter-leo": "^0.0.24",
     "@demox-labs/aleo-wallet-adapter-react": "^0.0.21",
     "@demox-labs/aleo-wallet-adapter-reactui": "^0.0.35",
-    "@provablehq/sdk": "^0.8.8",
+    "@provablehq/sdk": "file:../../provablehq/sdk/sdk",
     "aleo-adapters": "^1.2.1",
     "aleo-hooks": "^1.0.3",
     "antd": "^5.24.6",
