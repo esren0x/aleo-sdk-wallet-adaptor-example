@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState } from "react";
-import { AleoNetworkClient, BHP256 } from "@provablehq/sdk";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Address, AleoNetworkClient, BHP256 } from "@provablehq/sdk";
+import { useWallet } from "@demox-labs/aleo-wallet-adapter-react";
 
 // Create the context with a default value
 const DataContext = createContext({});
@@ -15,6 +16,19 @@ export const useGameState = () => {
 
 // Define the data structure
 export const GameState = ({ children }) => {
+
+    const { connected, publicKey } = useWallet();
+
+    const networkClient = new AleoNetworkClient("https://api.explorer.provable.com/v1");
+    const bhp = new BHP256();
+
+    const gamesPlayed = async () => {
+        const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
+        const addressHash = bhp.hash(addressPlaintextBits);
+        let numGames = await networkClient.getProgramMappingValue("rockpaperscissors_game_v0_1_1.aleo", "game_count", addressHash.toString()) ?? "0u64";
+        return parseInt(numGames.replace("u64", ""));
+    };
+
     const [gameState, setGameState] = useState({
         adapterTxStatus: "",
         txStatus: "",
@@ -22,6 +36,18 @@ export const GameState = ({ children }) => {
         games: [],
         numGames: 0,
     });
+
+    const setNumGames = (newNumGames) => {
+        setGameState(prevState => ({
+            ...prevState,
+            numGames: newNumGames,
+        }))
+    }
+
+    useEffect(() => {
+        gamesPlayed()
+            .then(gameCount => setNumGames(gameCount))
+    }, [connected])
 
     const setAdapterTxStatus = (newStatus) => {
         setGameState(prevState => ({
@@ -51,12 +77,6 @@ export const GameState = ({ children }) => {
         }))
     }
 
-    const setNumGames = (newNumGames) => {
-        setGameState(prevState => ({
-            ...prevState,
-            numGames: newNumGames,
-        }))
-    }
 
     return (
         <DataContext.Provider
@@ -71,8 +91,8 @@ export const GameState = ({ children }) => {
                 setGames,
                 numGames: gameState.numGames,
                 setNumGames,
-                networkClient: new AleoNetworkClient("https://api.explorer.provable.com/v1"),
-                bhp: new BHP256(),
+                networkClient,
+                bhp,
             }}
         >
             {children}

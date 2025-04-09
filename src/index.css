@@ -68,3 +68,7 @@ input[type="text"]:disabled {
 .button:hover {
   background-color: #ec005a;
 }
+
+.address {
+  color: #ec005a;
+}

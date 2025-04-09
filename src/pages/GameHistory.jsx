@@ -25,11 +25,6 @@ const GameHistory = () => {
     const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
     const addressHash = bhp.hash(addressPlaintextBits);
 
-    const gamesPlayed = async () => {
-        let numGames = await networkClient.getProgramMappingValue("rockpaperscissors_game_v0_1_1.aleo", "game_count", addressHash.toString()) ?? "0u64";
-        return parseInt(numGames.replace("u64", ""));
-    };
-
     const fetchGame = async (gameIndex) => {
         const gameStruct = `{
             player_hash: ${addressHash.toString()},
@@ -81,40 +76,37 @@ const GameHistory = () => {
         return {
             key: `${game.key}`,
             game: game.key,
-            playerMove: translateMove(game.playerMove),
-            systemMove: translateMove(game.systemMove),
+            playerMove: translateMove(game.player_move),
+            systemMove: translateMove(game.system_move),
             outcome: translateOutcome(game.outcome),
         }
     }
 
     useEffect(() => {
-        gamesPlayed().then((numGames) => {
-            setNumGames(numGames);
-            const start = page * 5;
-            const buildPage = async (start) => {
-                let gamesOnPage = [];
-                const end = start + 4;
-                for (let i = start; i <= end; i++) {
-                    const key = numGames - 1 - i;
-                    if (key < 0) {
-                        break;
-                    }
-                    let game = await fetchGame(key);
-                    game.key = key + 1;
-                    gamesOnPage.push(game);
+        const start = page * 5;
+        const buildPage = async (start) => {
+            let gamesOnPage = [];
+            const end = start + 4;
+            for (let i = start; i <= end; i++) {
+                const key = numGames - 1 - i;
+                if (key < 0) {
+                    break;
                 }
-                return gamesOnPage;
+                let game = await fetchGame(key);
+                game.key = key + 1;
+                gamesOnPage.push(game);
             }
-            buildPage(start).then(g => {
-                setGames(g);
-                setGamesLoading(false);
-            });
+            return gamesOnPage;
+        }
+        buildPage(start).then(g => {
+            setGames(g);
+            setGamesLoading(false);
         });
     }, [page]);
 
     return (
         <div className='history-container'>
-        {publicKey && <h4>Game History for {publicKey}:</h4>}
+        {publicKey && <h4>Game History for <span className='address'>{publicKey}</span></h4>}
             {
                 gamesLoading ?
                 <div style={ { display: 'flex', justifyContent: 'center' } }>

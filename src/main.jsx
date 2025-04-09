@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { App, ConfigProvider, Layout, Menu, Switch, theme } from "antd";
-import { GameState } from "./components/GameState";
+import { GameState, useGameState } from "./components/GameState";
 import { WalletWrapper } from "./components/WalletWrapper";
 import "./index.css"; // Ensure this exists
 
@@ -39,6 +39,7 @@ const menuItems = [
 const Main = () => {
 
   const { connected } = useWallet();
+
   
   const [menuIndex, setMenuIndex] = useState("/bidder");
 
@@ -72,7 +73,7 @@ const Main = () => {
         >
         <App>
           <Layout style={{ minHeight: "100vh"}}>
-            <Sider breakpoint="lg" collapsedWidth="0" theme="light" minWidth="20vw">
+            <Sider breakpoint="lg" collapsedWidth="0" theme="light">
               <h1 className={darkMode ? "headerDark" : "headerLight"}>
                 <Link to="/">
                   Rock Paper Scissors

@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Transaction, WalletAdapterNetwork } from "@demox-labs/aleo-wallet-adapter-base";
 import { useWallet } from "@demox-labs/aleo-wallet-adapter-react";
+import { Address } from "@provablehq/sdk";
 import { useGameState } from "../components/GameState";
 import { Button } from "antd";
 import "./Game.css";
@@ -21,6 +22,8 @@ const Homepage = () => {
         games,
         setGames,
         stats,
+        networkClient,
+        bhp,
     } = useGameState();
 
     const playGame = async (move) => {
@@ -64,7 +67,10 @@ const Homepage = () => {
                 await new Promise(r => setTimeout(r, 2000));
             }
 
-            let newStats = (await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "stats", addressHash)).toObject();
+            const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
+            const addressHash = bhp.hash(addressPlaintextBits);
+
+            const newStats = (await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "stats", addressHash)).toObject();
 
             if (newStats.wins > priorStats.wins) {
                 console.log("You win!")
