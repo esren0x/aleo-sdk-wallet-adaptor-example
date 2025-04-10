@@ -58,6 +58,10 @@ input[type="text"]:disabled {
   font-size: 18px;
   color: white;
   border: none;
+  width: 5vw;
+  height: 5vh;
+  font-weight: bold;
+  font-size: larger !important;
 
   a {
       text-decoration: none;
