@@ -50,7 +50,7 @@ const Homepage = () => {
                 deployedProgramId, // Program ID exactly as deployed
                 "play",          // Function name to call
                 inputs,          // Array of input strings
-                212751,             // Fee amount
+                312751,             // Fee amount
                 false            // Fee is public (false)
             );
 
