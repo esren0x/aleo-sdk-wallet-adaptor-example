@@ -22,15 +22,13 @@ const GameHistory = () => {
     const [gamesLoading, setGamesLoading] = useState(true);
     const [page, setPage] = useState(0);
 
-    const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
-    const addressHash = bhp.hash(addressPlaintextBits);
-
     const fetchGame = async (gameIndex) => {
+        const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
+        const addressHash = bhp.hash(addressPlaintextBits);
         const gameStruct = `{
             player_hash: ${addressHash.toString()},
             game_index: ${gameIndex}u64
         }`;
-
         let pt = Plaintext.fromString(gameStruct);
         let bits = pt.toBitsLe();
         let hash = bhp.hash(bits);
@@ -70,7 +68,9 @@ const GameHistory = () => {
         }
         buildPage(start).then(g => {
             setGames(g);
-            setGamesLoading(false);
+            if (g && g.length > 0) {
+                setGamesLoading(false);
+            }
         });
     }, [page, numGames]);
 

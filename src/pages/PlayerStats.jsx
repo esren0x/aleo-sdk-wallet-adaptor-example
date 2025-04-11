@@ -16,18 +16,16 @@ const PlayerStats = () => {
     const [stats, setStats] = useState({wins: 0, losses: 0, draws: 0});
     const [statsLoading, setStatsLoading] = useState(true);
 
-    const { numGames } = useGameState();
+    const { numGames, networkClient, bhp } = useGameState();
 
-    const networkClient = new AleoNetworkClient("https://api.explorer.provable.com/v1");
-    const bhp = new BHP256();
-    const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
-    const addressHash = bhp.hash(addressPlaintextBits);
-
+    
     const getStats = async () => {
-        let stats = (await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "stats", addressHash)).toObject();
-        let wins = Number(stats.wins);
-        let losses = Number(stats.losses);
-        let draws = numGames - (wins + losses);
+        const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
+        const addressHash = bhp.hash(addressPlaintextBits);
+        const stats = (await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "stats", addressHash)).toObject();
+        const wins = Number(stats.wins);
+        const losses = Number(stats.losses);
+        const draws = numGames - (wins + losses);
         return { wins, losses, draws };
     };
 
