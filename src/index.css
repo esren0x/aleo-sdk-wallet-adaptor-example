@@ -80,10 +80,10 @@ input[type="text"]:disabled {
   color: #ec005a;
 }
 
-.wallet-adapter-dropdown {
+.wallet-adapter-button-trigger {
   margin-top: 2vh;
-  width: 100%;
-  padding-left: 40px;
+  margin-left: 40px;
+  margin-bottom: 1vh;
 }
 
 .ant-layout-sider {
