@@ -42,7 +42,6 @@ const PlayerStats = () => {
     return (
         <div>
             <h3>Stats for <span className='address'>{publicKey}</span></h3>
-            {/* <p>Wins: {stats.wins} - Losses: {stats.losses} - Draws: {stats.draws}</p> */}
             {statsLoading ?
             <Spin size='large' tip='Loading...' ><div style={{
                 padding: 50,

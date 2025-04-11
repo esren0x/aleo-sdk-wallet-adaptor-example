@@ -72,7 +72,7 @@ const GameHistory = () => {
             setGames(g);
             setGamesLoading(false);
         });
-    }, [page]);
+    }, [page, numGames]);
 
     return (
         <div className='history-container'>

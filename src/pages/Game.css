@@ -2,7 +2,7 @@
 .game {
     padding: 10px;
     font-size: 14px;
-    width: 100vw;
+    width: 100%;
 }
 
 .arrow {
@@ -165,3 +165,17 @@ body {
     align-items: center;
     margin-top: 10rem;
 }
+
+.fade {
+    transition: opacity 1.5s ease;
+  }
+  
+  .visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+  
+  .hidden {
+    opacity: 0;
+    pointer-events: none;
+  }

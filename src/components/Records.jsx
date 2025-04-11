@@ -16,7 +16,6 @@ import {
 
 const Records = ({ wallet, publicKey, account }) => {
   // Make sure this program ID exactly matches your deployed program.
-  const deployedProgramId = "rockpaperscissors_game.aleo";
   
   const { requestRecords, records } = useRecords();
   

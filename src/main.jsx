@@ -7,7 +7,10 @@ import { WalletWrapper } from "./components/WalletWrapper";
 import "./index.css"; // Ensure this exists
 
 import {
+  BarChartOutlined,
   CodeOutlined,
+  HistoryOutlined,
+  PlayCircleOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
 
@@ -22,17 +25,17 @@ const menuItems = [
   {
     label: <Link to="/">Play Game</Link>,
     key: "",
-    icon: <CodeOutlined />,
+    icon: <PlayCircleOutlined />,
   },
   {
     label: <Link to="/history">Game History</Link>,
     key: "history",
-    icon: <SwapOutlined />,
+    icon: <HistoryOutlined />,
   },
   {
     label: <Link to="/stats">Player Stats</Link>,
     key: "stats",
-    icon: <CodeOutlined />,
+    icon: <BarChartOutlined />,
   },
 ];
 
@@ -96,8 +99,9 @@ const Main = () => {
                   checkedChildren="Dark"
                   unCheckedChildren="Light"
               />
+              <br />
               <WalletMultiButton />
-              <div>
+              <div style={{ textAlign: "center" }}>
               {connected ? (
                 <div>
                   <h3>✅ Connected Wallet</h3>
@@ -109,7 +113,7 @@ const Main = () => {
                   {/* Pass the wallet to the RockpaperScissors component */}
                 </div>
               ) : (
-                <p>🔴 Select a wallet to connect.</p>
+                <p>Select a wallet to connect.</p>
               )}
             </div>
             </Sider>

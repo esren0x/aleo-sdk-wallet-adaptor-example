@@ -4,80 +4,100 @@ import { Transaction, WalletAdapterNetwork } from "@demox-labs/aleo-wallet-adapt
 import { useWallet } from "@demox-labs/aleo-wallet-adapter-react";
 import { Address, Plaintext } from "@provablehq/sdk";
 import { useGameState } from "../components/GameState";
-import { Button, Spin } from "antd";
+import { Button, Progress, Typography } from "antd";
 import "./Game.css";
 // import GameHistory from "../components/GameHistory"
 // import PlayerStats from "../components/PlayerStats";
 
-const Homepage = () => {
+const Game = () => {
     // Make sure this program ID exactly matches your deployed program.
     const deployedProgramId = "rockpaperscissors_game_v0_1_1.aleo";
     const { publicKey, wallet } = useWallet();
 
     const [currentGame, setCurrentGame] = useState(null);
     const [gameLoading, setGameLoading] = useState(false);
+    const [loadingPercent, setLoadingPercent] = useState(0);
 
     const {
         txStatus,
         setTxStatus,
-        transactionId,
         setTransactionId,
-        games,
-        setGames,
-        stats,
+        setNumGames,
         networkClient,
         bhp,
         formatGame,
         gamesPlayed,
     } = useGameState();
 
+    const incrementLoad = async (oldValue, newValue, ms = 100) => {
+        for (let i = oldValue; i <= newValue; i++) {
+            await new Promise(r => setTimeout(r, ms))
+            setLoadingPercent(i);
+        }
+    }
+
+
     const playGame = async (move) => {
         try {
-            setGameLoading(true);
             if (!publicKey) throw new WalletNotConnectedError();
-            setTxStatus("Building");
+            let gameIndex = await gamesPlayed();
+            setGameLoading(true);
+            setTxStatus("Building Transaction...");
 
             // Prepare input. If the SDK expects a number instead of a string,
             // you might try: const inputs = [move]; instead of [`${move}u8`]
             const inputs = [`${move}u8`];
 
-            // IMPORTANT: Double-check that the chain ID is correct.
-            // For example, try "testnetbeta" exactly if that's what the network expects.
-            const chainId = "testnet";
+            await incrementLoad(0, 10);
+            setTxStatus("Building Transaction...");
 
             // Build the transaction using the helper.
             const tx = Transaction.createTransaction(
-                publicKey,       // Caller’s address
-                WalletAdapterNetwork.TestnetBeta,         // Chain ID (make sure it matches what the network expects)
-                deployedProgramId, // Program ID exactly as deployed
-                "play",          // Function name to call
-                inputs,          // Array of input strings
-                212751,             // Fee amount
-                false            // Fee is public (false)
+                publicKey,                          // Caller’s address
+                WalletAdapterNetwork.TestnetBeta,   // Chain ID (make sure it matches what the network expects)
+                deployedProgramId,                  // Program ID exactly as deployed
+                "play",                             // Function name to call
+                inputs,                             // Array of input strings
+                412751,                             // Fee amount
+                false                               // Fee is public (false)
             );
 
             console.log("Transaction built:", tx);
-            setTxStatus("Sending");
+
+            await incrementLoad(10, 20);
+            setTxStatus("Broadcasting Transaction...");
 
             // Execute the transaction using the wallet adapter.
             const txId = await wallet.adapter.requestTransaction(tx);
             console.log("Transaction executed:", txId);
             setTransactionId(txId);
-            setTxStatus("Sent");
+            setTxStatus("Transaction Sent");
 
             let adapterTxStatus = "";
-            while (adapterTxStatus !== "Finalized") {
+            await incrementLoad(20, 40, 150);
+            const finalizePromise = incrementLoad(40, 60, 400);
+            let retries = 10;
+            while (retries >= 0 && adapterTxStatus !== "Finalized") {
                 adapterTxStatus = await wallet?.adapter.transactionStatus(txId);
-                if (txStatus !== adapterTxStatus) {
-                    setTxStatus(adapterTxStatus);
+                if (adapterTxStatus === "Completed" && txStatus !== "Transaction Confirmed...") {
+                    setTxStatus("Transaction Confirmed...");
+                } else {
+                    if (retries <= 0) {
+                        setTxStatus("Polling Failed");
+                        throw "Transaction exceeded maximum number of retires."
+                    }
+                    retries--;
+                    await new Promise(r => setTimeout(r, 5000));
                 }
-                await new Promise(r => setTimeout(r, 5000));
             }
+            await finalizePromise;
+
+            setTxStatus("Transaction Finalized...");
+
+            await incrementLoad(60, 80, 300);
 
             const addressPlaintextBits = Address.from_string(publicKey).toPlaintext().toBitsLe();
             const addressHash = bhp.hash(addressPlaintextBits);
-
-            let gameIndex = await gamesPlayed()
 
             const gameStruct = `{
                 player_hash: ${addressHash.toString()},
@@ -87,23 +107,29 @@ const Homepage = () => {
             let pt = Plaintext.fromString(gameStruct);
             let bits = pt.toBitsLe();
             let hash = bhp.hash(bits);
-            console.log(hash)
-            console.log(hash.toString())
 
-            let retries = 10;
+            retries = 10;
             let latestGame;
             while (retries >= 0 && !latestGame) {
                 try {
-                    latestGame = await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "history", hash);
+                    if (txStatus !== "Aggregating Game Stats...") {
+                        setTxStatus("Aggregating Game Stats...");
+                    }
+                    await incrementLoad(100-retries-1, 100-retries);
+                    latestGame = await networkClient.getProgramMappingPlaintext("rockpaperscissors_game_v0_1_1.aleo", "history", hash.toPlaintext());
+                    await incrementLoad(100-retries, 100);
+                    setTxStatus("Transaction Complete!");
                     setCurrentGame(formatGame(latestGame.toObject()));
+                    setNumGames(gameIndex+1)
                 } catch (e) {
                     if (retries <= 0) {
                         throw e;
                     }
+                    console.log(e)
                     console.log(`Failed to fetch game, retrying... (${retries} attempts remaining)`);
                     retries--;
+                    await new Promise(r => setTimeout(r, 2000));
                 }
-                await new Promise(r => setTimeout(r, 5000));
             }
             setGameLoading(false);
         } catch (error) {
@@ -126,7 +152,7 @@ const Homepage = () => {
                     Learn to query program mappings using a simple game.
                 </p>{" "}
                     <div style={{ width: "100%", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-                        <div style={{ width: "1200px", textAlign: "center" }}>
+                        <div style={{ width: "1200px", textAlign: "center", marginTop: "20px" }}>
                             <h3>Select your move:</h3>
                             <div className="buttonRow">
                                 <Button className="button" onClick={() => playGame(0)}>Rock</Button>
@@ -134,21 +160,16 @@ const Homepage = () => {
                                 <Button className="button" onClick={() => playGame(2)}>Scissors</Button>
                             </div>
                         </div>
-                            {currentGame ? 
-                            <div className="actionRow">
+                            <div className={`outcomeLoader fade ${gameLoading && loadingPercent < 100 ? 'visible' : 'hidden'}`}>
+                                <Progress className="animate-pulse" percent={loadingPercent} percentPosition={{ align: 'center', type: 'inner' }} size={[400, 20]} strokeColor="#ec005a" />
+                            </div> 
+                            <Typography.Title level={5}>{txStatus}</Typography.Title>
+                            {currentGame &&
+                            <div className={`actionRow fade ${!gameLoading && loadingPercent >= 100 ? 'visible' : 'hidden'}`}>
                                     <div className="actionItem">You: {currentGame.playerMove}</div>
                                     <p className="actionItem">System: {currentGame.systemMove}</p>
                                     <p className="actionItem">{currentGame.outcome}</p>
-                            </div> :
-                            gameLoading ?
-                            <div className="outcomeLoader">
-                                <Spin size='large' tip={`Transaction ${txStatus}...`} >
-                                    <div style={{
-                                        padding: 50,
-                                        borderRadius: 4,
-                                    }} />
-                                </Spin>
-                            </div> : null
+                            </div>
                             }
                         <br/>
                     </div>
@@ -158,4 +179,4 @@ const Homepage = () => {
 
 }
 
-export default Homepage;
+export default Game;
