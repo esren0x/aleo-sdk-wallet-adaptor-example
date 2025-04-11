@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-    Address,
-    AleoNetworkClient,
-    BHP256,
-    initThreadPool,
-} from '@provablehq/sdk';
+import { Address } from '@provablehq/sdk';
 import { useGameState } from '../components/GameState';
 import { useWallet } from '@demox-labs/aleo-wallet-adapter-react';
 import { Spin, Table } from 'antd';

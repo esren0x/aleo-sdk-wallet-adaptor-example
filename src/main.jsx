@@ -1,17 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { App, ConfigProvider, Layout, Menu, Switch, theme } from "antd";
-import { GameState, useGameState } from "./components/GameState";
+import { GameState } from "./components/GameState";
 import { WalletWrapper } from "./components/WalletWrapper";
 import "./index.css"; // Ensure this exists
 
 import {
   BarChartOutlined,
-  CodeOutlined,
   HistoryOutlined,
   PlayCircleOutlined,
-  SwapOutlined,
 } from "@ant-design/icons";
 
 // Default styles (required for modal UI)

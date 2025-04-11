@@ -6,8 +6,6 @@ import { Address, Plaintext } from "@provablehq/sdk";
 import { useGameState } from "../components/GameState";
 import { Button, Progress, Typography } from "antd";
 import "./Game.css";
-// import GameHistory from "../components/GameHistory"
-// import PlayerStats from "../components/PlayerStats";
 
 const Game = () => {
     // Make sure this program ID exactly matches your deployed program.

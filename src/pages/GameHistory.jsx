@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useGameState } from "../components/GameState.jsx";
-import {
-    Transaction,
-    WalletAdapterNetwork,
-    WalletNotConnectedError,
-} from "@demox-labs/aleo-wallet-adapter-base";
-import {
-    Address,
-    AleoNetworkClient,
-    BHP256,
-    Plaintext,
-} from '@provablehq/sdk';
-import { RotatingSquare } from 'react-loader-spinner';
+import { Address, Plaintext } from '@provablehq/sdk';
 import { useWallet } from '@demox-labs/aleo-wallet-adapter-react';
 import { Button, Spin, Table } from 'antd';
 
