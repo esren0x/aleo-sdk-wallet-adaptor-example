@@ -58,7 +58,7 @@ const Game = () => {
                 deployedProgramId,                  // Program ID exactly as deployed
                 "play",                             // Function name to call
                 inputs,                             // Array of input strings
-                412751,                             // Fee amount
+                212751,                             // Fee amount
                 false                               // Fee is public (false)
             );
 
@@ -75,12 +75,16 @@ const Game = () => {
 
             let adapterTxStatus = "";
             await incrementLoad(20, 40, 150);
-            const finalizePromise = incrementLoad(40, 60, 400);
             let retries = 10;
+            let confirmed = false;
             while (retries >= 0 && adapterTxStatus !== "Finalized") {
                 adapterTxStatus = await wallet?.adapter.transactionStatus(txId);
-                if (adapterTxStatus === "Completed" && txStatus !== "Transaction Confirmed...") {
+                if (adapterTxStatus === "Completed" && !confirmed) {
+                    confirmed = true;
                     setTxStatus("Transaction Confirmed...");
+                    await new Promise(r => setTimeout(r, 1000));
+                    setTxStatus("Finalizing Transaction...");
+                    await incrementLoad(40, 60, 1000);
                 } else {
                     if (retries <= 0) {
                         setTxStatus("Polling Failed");
@@ -90,8 +94,6 @@ const Game = () => {
                     await new Promise(r => setTimeout(r, 5000));
                 }
             }
-            await finalizePromise;
-
             setTxStatus("Transaction Finalized...");
 
             await incrementLoad(60, 80, 300);
