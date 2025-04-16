@@ -77,7 +77,7 @@ const Game = () => {
             let confirmed = false;
             while (retries >= 0 && adapterTxStatus !== "Finalized") {
                 adapterTxStatus = await wallet?.adapter.transactionStatus(txId);
-                if (adapterTxStatus === "Completed" && !confirmed) {
+                if ((adapterTxStatus === "Completed" || adapterTxStatus === "Pending") && !confirmed) {
                     confirmed = true;
                     setTxStatus("Transaction Confirmed...");
                     await new Promise(r => setTimeout(r, 1000));

@@ -27,7 +27,7 @@ export const WalletWrapper = ({ children }) => {
                     ["AleoMainnet"]: [
                         "rockpaperscissors_game_v0_1_1.aleo",
                     ],
-                    ["AleoTestnet"]: [
+                    [WalletAdapterNetwork.TestnetBeta]: [
                         "rockpaperscissors_game_v0_1_1.aleo",
                     ],
                 },
